@@ -18,12 +18,12 @@ pygame.display.set_caption(CAPTION)
 red_life = pygame.image.load("red_heart.png")
 black_life = pygame.image.load("black_heart.jpg")
 lifes_numbers_init = 4
+global lifes_numbers
 lifes_numbers = lifes_numbers_init
 top_left_life_x = 400
 top_left_life_y = 25
 life_width = 25
 life_height = 25
-
 
 # draw hearts function
 def draw_hearts():
@@ -46,7 +46,7 @@ alien_y_init = 10
 # create alien
 def build_aliens():
     for i in  range(alien_number):
-        aliens_list.append([pygame.Rect((top_left_alien_x + i * 40), alien_y_init, alien_width, alien_height), False, False])
+        aliens_list.append([pygame.Rect((top_left_alien_x + i * 40), alien_y_init, alien_width, alien_height), False, False, False])
 
 # create aliens
 build_aliens()
@@ -60,7 +60,7 @@ def move_aliens():
 
 
 # ship
-was_not_colliding_with_alien = True
+still_colliding_with_alien = False
 ship_color = (161, 7, 185)
 ship_width = 20
 ship_height = 50
@@ -69,6 +69,20 @@ latest_ship_x = ship_x
 ship_y = HEIGHT - ship_height - (ship_height // 2)
 latest_ship_y = ship_y
 ship_rect = pygame.Rect(ship_x, ship_y, ship_width, ship_height)
+
+# check ship alien collision function
+def check_ship_alien_collision():
+    global lifes_numbers
+    for alien in aliens_list:
+        if ship_rect.colliderect(alien[0]) and not still_colliding_with_alien and not alien[3]:
+            still_colliding_with_alien = True
+            alien[3] = True
+            if lifes_numbers > 0:
+                lifes_numbers = lifes_numbers - 1
+        elif not ship_rect.colliderect(alien[0]):
+            still_colliding_with_alien = False
+            alien[3] = False
+            
 
 # check colid x coordinates
 """
@@ -144,9 +158,6 @@ def build_b_counter_display():
 def update_screen():
     clock.tick(fps)
     SCREEN.fill((255, 255, 255))
-
-    # changing x & y coordinates when player moves the ship
-    move_ship()
 
     # draw the ship on the screen
     pygame.draw.rect(SCREEN, ship_color, ship_rect)
@@ -249,10 +260,15 @@ while is_running:
                         alien[2] = True
                     
 
+    # changing x & y coordinates when player moves the ship
+    move_ship()
     
 
     # alien movement control
     move_aliens()
+
+    # check collision between ship and one alien
+    check_ship_alien_collision()
 
     # call for building bullets counter display block function
     build_b_counter_display()
