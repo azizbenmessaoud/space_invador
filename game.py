@@ -156,6 +156,7 @@ bullet_color = (239, 62, 8)
 bullet_width = 5
 bullet_height = 15
 bullet_speed = 10
+score = 0
 
 # build bullet
 def build_bullet():
@@ -167,6 +168,14 @@ def build_b_counter_display():
     bullets_counter_list = []
     for i in range(bullets_counter_init):
         bullets_counter_list.append(pygame.Rect((bullet_counter_block_x + i * bullets_counter_init), bullet_counter_block_y, bullet_width, bullet_height))
+
+# display score
+def display_score():
+    font = pygame.font.Font('freesansbold.ttf', 20)
+    text = font.render('score:' + str(score), True, (0, 0, 0))
+    textRect = text.get_rect()
+    textRect.center = (450, 70)
+    SCREEN.blit(text, textRect)
 
 # update screen function 
 def update_screen():
@@ -203,6 +212,9 @@ def update_screen():
 
     # draw borders
     build_borders()
+
+    # display score
+    display_score()
         
     pygame.display.update()
 
@@ -271,6 +283,8 @@ while is_running:
                         alien[1] = True
                     # if hit before, make it disappear
                     elif alien[2] == False:
+                        # increase score
+                        score += 1
                         # add another extra bullet when killing an alien
                         if bullets_counter < bullets_counter_init:
                             bullets_counter += 1
