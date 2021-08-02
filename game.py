@@ -14,6 +14,20 @@ CAPTION = 'Space Invador'
 SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption(CAPTION)
 
+# screen border
+br_hor_wth = 380
+br_ver_ht = 480
+br_ver_wth = br_hor_ht = 10
+br_x_y = 8
+
+# build borders
+def build_borders():
+    pygame.draw.rect(SCREEN, (0, 0, 0), pygame.Rect(br_x_y, br_x_y, br_hor_wth, br_hor_ht))
+    pygame.draw.rect(SCREEN, (0, 0, 0), pygame.Rect(br_x_y, br_x_y, br_ver_wth, br_ver_ht))
+    pygame.draw.rect(SCREEN, (0, 0, 0), pygame.Rect(br_x_y + br_hor_wth - br_ver_wth, br_x_y, br_ver_wth, br_ver_ht))
+    pygame.draw.rect(SCREEN, (0, 0, 0), pygame.Rect(br_x_y, br_x_y + br_ver_ht, br_hor_wth, br_hor_ht))
+    
+
 # lives : red hearts, black hearts
 red_life = pygame.image.load("red_heart.png")
 black_life = pygame.image.load("black_heart.jpg")
@@ -35,12 +49,12 @@ def draw_hearts():
 
 # aliens
 aliens_list = []
-alien_number = 10
+alien_number = 8
 alien_color_init = (39, 186, 6)
 alien_color_hit = (151, 1, 1)
 alien_width = 20
 alien_height = 40
-top_left_alien_x = 10
+top_left_alien_x = 40
 alien_y_init = 10
 
 # create alien
@@ -186,6 +200,9 @@ def update_screen():
 
     # draw lifes : hearts
     draw_hearts()
+
+    # draw borders
+    build_borders()
         
     pygame.display.update()
 
