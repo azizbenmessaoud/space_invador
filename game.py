@@ -19,13 +19,17 @@ br_hor_wth = 380
 br_ver_ht = 480
 br_ver_wth = br_hor_ht = 10
 br_x_y = 8
+br_h_up = pygame.Rect(br_x_y, br_x_y, br_hor_wth, br_hor_ht)
+br_h_down = pygame.Rect(br_x_y, br_x_y + br_ver_ht, br_hor_wth, br_hor_ht)
+br_v_left = pygame.Rect(br_x_y, br_x_y, br_ver_wth, br_ver_ht)
+br_v_right = pygame.Rect(br_x_y + br_hor_wth - br_ver_wth, br_x_y, br_ver_wth, br_ver_ht)
 
 # build borders
 def build_borders():
-    pygame.draw.rect(SCREEN, (0, 0, 0), pygame.Rect(br_x_y, br_x_y, br_hor_wth, br_hor_ht))
-    pygame.draw.rect(SCREEN, (0, 0, 0), pygame.Rect(br_x_y, br_x_y, br_ver_wth, br_ver_ht))
-    pygame.draw.rect(SCREEN, (0, 0, 0), pygame.Rect(br_x_y + br_hor_wth - br_ver_wth, br_x_y, br_ver_wth, br_ver_ht))
-    pygame.draw.rect(SCREEN, (0, 0, 0), pygame.Rect(br_x_y, br_x_y + br_ver_ht, br_hor_wth, br_hor_ht))
+    pygame.draw.rect(SCREEN, (0, 0, 0), br_h_up)
+    pygame.draw.rect(SCREEN, (0, 0, 0), br_h_down)
+    pygame.draw.rect(SCREEN, (0, 0, 0), br_v_left)
+    pygame.draw.rect(SCREEN, (0, 0, 0), br_v_right)
     
 
 # lives : red hearts, black hearts
@@ -86,8 +90,10 @@ ship_rect = pygame.Rect(ship_x, ship_y, ship_width, ship_height)
 
 # check ship alien collision function
 def check_ship_alien_collision():
+    global still_colliding_with_alien
     global lifes_numbers
     for alien in aliens_list:
+
         if ship_rect.colliderect(alien[0]) and not still_colliding_with_alien and not alien[3]:
             still_colliding_with_alien = True
             alien[3] = True
@@ -120,16 +126,16 @@ def collidate_y():
 
 # changing x and y coordinates when pressing on keyboard specific buttons
 def move_ship():
-    if up_key_down:
+    if up_key_down and not ship_rect.colliderect(br_h_up):
         latest_ship_y = ship_rect.y
         ship_rect.y -= speed_y
-    if down_key_down:
+    if down_key_down and not ship_rect.colliderect(br_h_down):
         latest_ship_y = ship_rect.y
         ship_rect.y  += speed_y
-    if right_key_down:
+    if right_key_down and not ship_rect.colliderect(br_v_right):
         latest_ship_x = ship_rect.x
         ship_rect.x  += speed_x
-    if left_key_down:
+    if left_key_down and not ship_rect.colliderect(br_v_left):
         latest_ship_x = ship_rect.x
         ship_rect.x  -= speed_x
 
@@ -176,6 +182,27 @@ def display_score():
     textRect = text.get_rect()
     textRect.center = (450, 70)
     SCREEN.blit(text, textRect)
+
+# check if last alien is out function
+def check_if_last_alien_is_out():
+    for alien in aliens_list:
+        if alien[0].y >= HEIGHT:
+            return True
+    return False
+
+# check if all aliens are dead
+def check_all_aliens_dead():
+    for alien in aliens_list:
+        if not alien[2]:
+            return False
+    return True
+
+# check if game over
+def check_game_over():
+    global game_over
+    if check_if_last_alien_is_out() or lifes_numbers == 0 or check_all_aliens_dead():
+        game_over = True
+
 
 # update screen function 
 def update_screen():
@@ -228,6 +255,8 @@ speed_x = 7
 speed_y = 7
 fps = 60
 is_running = True
+global game_over
+game_over = False
 
 # game loop
 while is_running:
@@ -284,6 +313,7 @@ while is_running:
                     # if hit before, make it disappear
                     elif alien[2] == False:
                         # increase score
+                        alien[0].x = alien[0].y = -600
                         score += 1
                         # add another extra bullet when killing an alien
                         if bullets_counter < bullets_counter_init:
@@ -307,5 +337,23 @@ while is_running:
     # fill in the screen with a background color
     SCREEN.fill((111, 111, 111))
 
-    # call update screen
-    update_screen()
+    # check if game over
+    check_game_over()
+
+    
+    if not game_over:
+        # call update screen
+        update_screen()
+    else:
+        end_game_font = pygame.font.Font('freesansbold.ttf', 20)
+        if lifes_numbers == 0:
+            end_game_text = end_game_font.render('GAME OVER! YOU LOST\n YOUR SCORE:' + str(score), True, (240, 0, 0))
+        elif score < 5:
+            end_game_text = end_game_font.render('GAME OVER! Average\n YOUR SCORE:' + str(score), True, (240, 80, 0))
+        else:
+            end_game_text = end_game_font.render('GAME OVER! GOOD JOB\n YOUR SCORE:' + str(score), True, (0, 240, 16))
+        end_game_rect = end_game_text.get_rect()
+        end_game_rect.center = (250, 250)
+        SCREEN.blit(end_game_text, end_game_rect)
+        pygame.display.update()
+
